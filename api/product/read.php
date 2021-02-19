@@ -14,10 +14,15 @@ $database = new Database();
 $db = $database->getConnection();
 
 $authHeader =  $_SERVER['HTTP_AUTHORIZATION'];
-$arr = explode(" ", $authHeader);
-$jwt = $arr[1];
+if(!empty($authHeader)){
+    $arr = explode(" ", $authHeader);
+    $jwt = $arr[1];
+} else {
+    $jwt = null;
+}
 
-if($jwt){
+
+if(!empty($jwt)){
     try{
         $decoded = JWT::decode($jwt, $secret_key, array("HS256"));
         $product = new Product($db);
@@ -54,4 +59,9 @@ if($jwt){
             "error" => $e->getMessage()
         ));
     }
+} else {
+    http_response_code(401);
+    echo json_encode(array(
+        "message" => "Acesso negado",
+    ));
 }
